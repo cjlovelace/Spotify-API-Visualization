@@ -1,7 +1,14 @@
 document.querySelector("button").onclick = function () {
   // Call python's random_python function
-  eel.print_albums()(function(number){
-    // Update the div with a random number returned by python
-    document.querySelector(".random_number").innerHTML = number;
-  })
+
 }
+
+window.addEventListener('load', (image) => {
+    eel.get_user_image()(function(number){
+        document.querySelector(".grid-item-image").innerHTML = number;
+    })
+
+    eel.get_user_info()(function(number){
+        document.querySelector(".grid-item-info").innerHTML += number;
+    })
+});
