@@ -1,12 +1,33 @@
-button {
-    display: block;
-    margin: 0 auto;
+body {
+    font-size: 24px;
 }
 
+
 .grid-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr;
-      gap: 0px 0px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 0px 0px;
+    border: 2px solid black;
+    padding-top: 10px;
+    padding-left: 5px;
+}
+
+#faded {
+    opacity: 0.5;
+    filter: grayscale(100%);
+    width: 20px;
+    height: 20px;
+}
+
+#normal {
+    width: 35px;
+    height: 35px;
+}
+
+#normal, #faded {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
 }
 
