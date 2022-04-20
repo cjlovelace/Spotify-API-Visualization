@@ -7,7 +7,7 @@ window.addEventListener('load', (image) => {
         document.querySelector(".grid-item-info").innerHTML += number;
     })
 
-    eel.userTrackStuff()(function(number){
+    eel.user_top_artists()(function(number){
         document.querySelector(".display-artists").innerHTML += number;
     })
 

@@ -4,13 +4,8 @@ import json
 import base64
 import numpy as np
 import requests
-import matplotlib.pyplot as plt
-import spotipy.util as util
 from collections import namedtuple
 from datetime import datetime
-from spotipy.oauth2 import SpotifyClientCredentials
-from spotipy.oauth2 import SpotifyOAuth
-from spotipy import oauth2
 from collections import Counter
 
 Item = namedtuple("Item", ["artist", "track", "ms_played", "timestamp"])
@@ -31,6 +26,7 @@ graph_int = 0
 eel.init("static_web_folder")
 
 
+# Loads user streaming history from Spotify JSON, storing into global Item tuple
 @eel.expose
 def streaming_history():
     print("Test")
@@ -54,6 +50,7 @@ def streaming_history():
         )
 
 
+# Uses Spotify User ID to return user photo into application's frontend
 @eel.expose
 def get_user_image():
     token = getToken()
@@ -64,6 +61,7 @@ def get_user_image():
     return '<img src="' + userImage + '" width="220" height="220">'
 
 
+# Using Spotify User ID, the basic 'scorecard' is returned with most common data presented to application's frontend
 @eel.expose
 def get_user_info():
     token = getToken()
@@ -74,11 +72,12 @@ def get_user_info():
     userURL = userURLDict.get('spotify')
     userTopSong = topsongs[0]
     info = '<b>User:</b> ' + userName + " " + '<a href="' + userURL + '"><img src="Spotify_Icon_RGB_Green.png" width="30" height="30"></a>' + \
-           '<br><b>Top Artist:</b> ' + topartists[0] + '<br><b>Top Song:</b> ' + topsongs[0] + '<br><b>Most Active During: </b> ' + time_icon \
+           '<br><b>Top Artist:</b> ' + topartists[0] + '<br><b>Top Song:</b> ' + topsongs[
+               0] + '<br><b>Most Active During: </b> ' + time_icon \
            + '<br><b>Total Time Listened:</b> ' + total_time
     return info
 
-
+# For a given year, function stores top artists into array for higher data granularity throughout application
 @eel.expose
 def top_artists_year():
     global top_artists_complete, topsongs
@@ -114,6 +113,7 @@ def top_artists_year():
     time_song_listened_to()
 
 
+# Tabulates the song listen totals over three periods (morning/afternoon/evening) and returns appropriate period icon
 def time_song_listened_to():
     YEAR = 2021
     global time_icon, total_time
@@ -140,7 +140,6 @@ def time_song_listened_to():
         else:
             evening += 1
 
-
     times = [morning, afternoon, evening]
     largest_time = times[0]
     time_period = 0
@@ -156,25 +155,24 @@ def time_song_listened_to():
     else:
         time_icon = '<img src="morningicon.png" id="faded"><img src="afternoonicon.png" id="faded"><img src="nighticon.png" id="normal">'
 
-    total_time = f"{total_time/1000/60/60:0.2f} hours"
+    total_time = f"{total_time / 1000 / 60 / 60:0.2f} hours"
     print(total_time)
     print(time_icon)
     print("Big: " + str(largest_time))
 
 
+# Returns top artist output and related graphs to front end
 @eel.expose
-def userTrackStuff():
+def user_top_artists():
     global display_artists
     token = getToken()
     sp = spotipy.Spotify(auth=token)
-    track = sp.search(q='artist:' + "Nasty Cherry" + ' track:' + "Brain Soup", type="track")
-    track_dict = track['tracks']['items'][0]['id']
-    features = sp.audio_features(track_dict)
     temp_string = ""
     counter = 0
     for x in topartists:
         artist_search = sp.search(q='artist:' + topartists[counter])
 
+        #Manual input of Spotify IDs as artists are assumed by Spotify to be 'Wang Chung' and 'Guns N Roses' respectively
         if topartists[counter] == "CHUNG HA":
             artist_info = sp.artist("2PSJ6YriU7JsFucxACpU7Y")
             artist_img_url = artist_info['images'][0]['url']
@@ -187,34 +185,36 @@ def userTrackStuff():
             artist_img_url = artist_info['images'][0]['url']
 
         print(artist_img_url)
-        temp_string += f'<div class="{topartists[counter]}" id="artist_row">' + f'<img src="{artist_img_url}" id="artist">' +\
-                       " " + topartists[counter] + "     " + f'<span id="listen_count">{str(topcounter[counter])} Plays</span>' + \
+        temp_string += f'<div class="{topartists[counter]}" id="artist_row">' + f'<img src="{artist_img_url}" id="artist">' + \
+                       " " + topartists[
+                           counter] + "     " + f'<span id="listen_count">{str(topcounter[counter])} Plays</span>' + \
                        "<br>" + f'<div class="artist{str(counter)}">' + f'{get_artist_graphs(counter)}' + '</div></div>'
         display_artists.append(temp_string)
         counter += 1
 
     return temp_string
 
+# Returns user information data visualizations to frontend of application
 @eel.expose
 def display_user_info():
     temp = '<center><img src="topsongs.png"><br><img src="streamspertime.png"><br><img src="treemap.png"></center>'
     return temp
 
+# For each artist, their respective artist data visualizations are returned to frontend of application
 @eel.expose
 def get_artist_graphs(tempInt):
-
-    temp = f'<center><img src="songplays{topartists[tempInt]}.png">' + f'<img src="month{topartists[tempInt]}.png">' \
+    temp = f'<center><img src="songplays{topartists[tempInt]}.png" id="songplays">' + f'<img src="month{topartists[tempInt]}.png">' \
            + f'<img src="songpie{topartists[tempInt]}.png"></center>'
     return temp
 
-
+# Requests token from Spotify authentication in order to use API calls amd commands
+# Resets token upon reopening of application to ensure user can access app at any time or frequency
 def getToken():
     SPOTIPY_CLIENT_ID = '288dfaa928f04c69a45267bd1ba69fe2'
     SPOTIPY_CLIENT_SECRET = 'd308118dc2b84a16a4cc87d36f491d62'
     url = "https://accounts.spotify.com/api/token"
     headers = {}
     data = {}
-
 
     message = f"{SPOTIPY_CLIENT_ID}:{SPOTIPY_CLIENT_SECRET}"
     messageBytes = message.encode('ascii')
