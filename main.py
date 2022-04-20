@@ -24,6 +24,7 @@ time_of_listen = []
 time_icon = ""
 total_time = 0
 top_artists_complete = 0
+globalToken = ""
 
 eel.init("static_web_folder")
 
@@ -63,8 +64,9 @@ def get_user_image():
 
 @eel.expose
 def get_user_info():
-    token = getToken()
-    sp = spotipy.Spotify(auth=token)
+    global globalToken
+    globalToken = getToken()
+    sp = spotipy.Spotify(auth=globalToken)
     userImageURL = sp.user("12178010763").get('images')
     userName = sp.user("12178010763").get('display_name')
     userURLDict = sp.user("12178010763").get('external_urls')
@@ -148,7 +150,8 @@ def time_song_listened_to():
 
 
 def userTrackStuff():
-    token = getToken()
+    global globalToken
+    token = globalToken
     sp = spotipy.Spotify(auth=token)
     track = sp.search(q='artist:' + "Nasty Cherry" + ' track:' + "Brain Soup", type="track")
     track_dict = track['tracks']['items'][0]['id']
