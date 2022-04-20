@@ -21,6 +21,7 @@ userURL = ""
 topartists = []  # top ten artists
 topcounter = []
 time_of_listen = []
+display_artists = []
 time_icon = ""
 total_time = 0
 top_artists_complete = 0
@@ -147,12 +148,37 @@ def time_song_listened_to():
     print("Big: " + str(largest_time))
 
 
+@eel.expose
 def userTrackStuff():
+    global display_artists
     token = getToken()
     sp = spotipy.Spotify(auth=token)
     track = sp.search(q='artist:' + "Nasty Cherry" + ' track:' + "Brain Soup", type="track")
     track_dict = track['tracks']['items'][0]['id']
     features = sp.audio_features(track_dict)
+    temp_string = ""
+    counter = 0
+    for x in topartists:
+        artist_search = sp.search(q='artist:' + topartists[counter])
+
+        if topartists[counter] == "CHUNG HA":
+            artist_info = sp.artist("2PSJ6YriU7JsFucxACpU7Y")
+            artist_img_url = artist_info['images'][0]['url']
+        elif topartists[counter] == "ROSÉ":
+            artist_info = sp.artist("3eVa5w3URK5duf6eyVDbu9")
+            artist_img_url = artist_info['images'][0]['url']
+        else:
+            artist_id = artist_search['tracks']['items'][0]['artists'][0]['id']
+            artist_info = sp.artist(artist_id)
+            artist_img_url = artist_info['images'][0]['url']
+
+        print(artist_img_url)
+        temp_string += f'<div class="{topartists[counter]}" id="artist_row">' + f'<img src="{artist_img_url}" id="artist">' +\
+                       " " + topartists[counter] + "     " + f'<span id="listen_count">{str(topcounter[counter])} Plays</span>' + "</div><br>"
+        display_artists.append(temp_string)
+        counter += 1
+
+    return temp_string
 
 
 def getToken():
@@ -161,6 +187,7 @@ def getToken():
     url = "https://accounts.spotify.com/api/token"
     headers = {}
     data = {}
+
 
     message = f"{SPOTIPY_CLIENT_ID}:{SPOTIPY_CLIENT_SECRET}"
     messageBytes = message.encode('ascii')
