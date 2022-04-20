@@ -197,13 +197,14 @@ def userTrackStuff():
 
 @eel.expose
 def display_user_info():
-    temp = '<center><img src="topsongs.png"><br><img src="streamspertime.png"></center>'
+    temp = '<center><img src="topsongs.png"><br><img src="streamspertime.png"><br><img src="treemap.png"></center>'
     return temp
 
 @eel.expose
 def get_artist_graphs(tempInt):
 
-    temp = f'<center><img src="songplays{topartists[tempInt]}.png">' + f'<img src="month{topartists[tempInt]}.png">' + f'<img src="songpie{topartists[tempInt]}.png"></center>'
+    temp = f'<center><img src="songplays{topartists[tempInt]}.png">' + f'<img src="month{topartists[tempInt]}.png">' \
+           + f'<img src="songpie{topartists[tempInt]}.png"></center>'
     return temp
 
 
