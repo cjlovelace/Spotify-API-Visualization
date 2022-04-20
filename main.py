@@ -19,12 +19,14 @@ userImage = ""
 userName = ""
 userURL = ""
 topartists = []  # top ten artists
+topsongs = []
 topcounter = []
 time_of_listen = []
 display_artists = []
 time_icon = ""
 total_time = 0
 top_artists_complete = 0
+graph_int = 0
 
 eel.init("static_web_folder")
 
@@ -59,7 +61,7 @@ def get_user_image():
     user = sp.user("12178010763")
     userImageURL = sp.user("12178010763").get('images')
     userImage = userImageURL[0].get('url')
-    return '<img src="' + userImage + '" width="160" height="160">'
+    return '<img src="' + userImage + '" width="220" height="220">'
 
 
 @eel.expose
@@ -70,19 +72,24 @@ def get_user_info():
     userName = sp.user("12178010763").get('display_name')
     userURLDict = sp.user("12178010763").get('external_urls')
     userURL = userURLDict.get('spotify')
-    info = '<b>User:</b> ' + userName + " " + '<a href="' + userURL + '"><img src="Spotify_Icon_RGB_Green.png" width="20" height="20"></a>' + \
-           '<br><b>Top Artist:</b> ' + topartists[0] + '<br><b>Most Active During: </b> ' + time_icon + '<br><b>Total Time Listened:</b> ' + total_time
+    userTopSong = topsongs[0]
+    info = '<b>User:</b> ' + userName + " " + '<a href="' + userURL + '"><img src="Spotify_Icon_RGB_Green.png" width="30" height="30"></a>' + \
+           '<br><b>Top Artist:</b> ' + topartists[0] + '<br><b>Top Song:</b> ' + topsongs[0] + '<br><b>Most Active During: </b> ' + time_icon \
+           + '<br><b>Total Time Listened:</b> ' + total_time
     return info
 
 
 @eel.expose
 def top_artists_year():
-    global top_artists_complete
+    global top_artists_complete, topsongs
     top_artists_complete = 1
 
     YEAR = 2021
 
     artists = []
+    tracks = []
+    test = []
+    num = []
     listens = np.array((10, 12), dtype=int)
 
     for item in streaming_history():
@@ -90,13 +97,20 @@ def top_artists_year():
             continue
 
         artists.append(item.artist)
+        tracks.append((item.track, item.artist))
 
     for artist, counter in Counter(artists).most_common(10):
         print(f"{artist} [{counter}]")
         topartists.append(artist)
         topcounter.append(counter)
 
+    for (track, artist), counter in Counter(tracks).most_common(20):
+        print(f"{track} by {artist} [{counter}]")
+        test.append(str(track + " - " + artist))
+        num.append(counter)
+
     print(topartists)
+    topsongs = test
     time_song_listened_to()
 
 
@@ -174,11 +188,23 @@ def userTrackStuff():
 
         print(artist_img_url)
         temp_string += f'<div class="{topartists[counter]}" id="artist_row">' + f'<img src="{artist_img_url}" id="artist">' +\
-                       " " + topartists[counter] + "     " + f'<span id="listen_count">{str(topcounter[counter])} Plays</span>' + "</div><br>"
+                       " " + topartists[counter] + "     " + f'<span id="listen_count">{str(topcounter[counter])} Plays</span>' + \
+                       "<br>" + f'<div class="artist{str(counter)}">' + f'{get_artist_graphs(counter)}' + '</div></div>'
         display_artists.append(temp_string)
         counter += 1
 
     return temp_string
+
+@eel.expose
+def display_user_info():
+    temp = '<center><img src="topsongs.png"><br><img src="streamspertime.png"></center>'
+    return temp
+
+@eel.expose
+def get_artist_graphs(tempInt):
+
+    temp = f'<center><img src="songplays{topartists[tempInt]}.png">' + f'<img src="month{topartists[tempInt]}.png">' + f'<img src="songpie{topartists[tempInt]}.png"></center>'
+    return temp
 
 
 def getToken():
