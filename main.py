@@ -7,6 +7,8 @@ import requests
 from collections import namedtuple
 from datetime import datetime
 from collections import Counter
+from static_web_folder.keyconfig import *
+
 
 Item = namedtuple("Item", ["artist", "track", "ms_played", "timestamp"])
 userToken = ""
@@ -210,13 +212,11 @@ def get_artist_graphs(tempInt):
 # Requests token from Spotify authentication in order to use API calls amd commands
 # Resets token upon reopening of application to ensure user can access app at any time or frequency
 def getToken():
-    SPOTIPY_CLIENT_ID = '288dfaa928f04c69a45267bd1ba69fe2'
-    SPOTIPY_CLIENT_SECRET = 'd308118dc2b84a16a4cc87d36f491d62'
     url = "https://accounts.spotify.com/api/token"
     headers = {}
     data = {}
 
-    message = f"{SPOTIPY_CLIENT_ID}:{SPOTIPY_CLIENT_SECRET}"
+    message = f"{get_client_id()}:{get_client_secret()}"
     messageBytes = message.encode('ascii')
     base64Bytes = base64.b64encode(messageBytes)
     base64Message = base64Bytes.decode('ascii')
